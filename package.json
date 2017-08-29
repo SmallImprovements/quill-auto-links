@@ -1,6 +1,6 @@
 {
   "name": "quill-auto-links",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Automatically convert typed and pasted links to real links in Quill",
   "main": "dist/index.js",
   "babel": {
@@ -10,8 +10,7 @@
     ]
   },
   "scripts": {
-    "build": "babel src -d dist",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "babel src -d dist"
   },
   "repository": {
     "type": "git",
@@ -21,12 +20,12 @@
     "quill",
     "links"
   ],
-  "author": "LFDM",
+  "author": "Gernot Hoeflechner <1986gh@gmail.com> (http://github.com/lfdm)",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/SmallImprovements/quill-auto-links/issues"
   },
-  "homepage": "https://github.com/SmallImprovements/quill-auto-links#readme",
+  "homepage": "https://github.com/SmallImprovements/quill-auto-links",
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "babel-core": "^6.26.0",
