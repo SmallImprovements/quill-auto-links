@@ -3,37 +3,24 @@ const DEFAULT_OPTIONS = {
   type: true,
 };
 
-const REGEXP = /https?:\/\/[^\s]+/;
+const REGEXP_GLOBAL = /https?:\/\/[^\s]+/g;
+const REGEXP_WITH_PRECEDING_WS = /(?:\s|^)(https?:\/\/[^\s]+)/;
 
 function registerTypeListener(quill) {
   quill.keyboard.addBinding({
     collapsed: true,
     key: ' ',
-    prefix: REGEXP,
-    handler: (() => {
-      let prevOffset = 0;
-      return range => {
-        let url;
-        const text = quill.getText(prevOffset, range.index);
-        const match = text.match(REGEXP);
-        if (match === null) {
-          prevOffset = range.index;
-          return true;
-        }
-        if (match.length > 1) {
-          url = match[match.length - 1];
-        } else {
-          url = match[0];
-        }
-        const ops = [];
-        ops.push({ retain: range.index - url.length });
-        ops.push({ 'delete': url.length });
-        ops.push({ insert: url, attributes: { link: url } });
-        quill.updateContents({ ops });
-        prevOffset = range.index;
-        return true;
-      };
-    })(),
+    prefix: REGEXP_WITH_PRECEDING_WS,
+    handler: (range, context) => {
+      const url = context.prefix;
+      const ops = [
+          { retain: range.index - url.length },
+          { 'delete': url.length },
+          { insert: url, attributes: { link: url } }
+      ];
+      quill.updateContents({ ops });
+      return true;
+    }
   });
 }
 
@@ -42,7 +29,7 @@ function registerPasteListener(quill) {
     if (typeof node.data !== 'string') {
       return;
     }
-    const matches = node.data.match(REGEXP);
+    const matches = node.data.match(REGEXP_GLOBAL);
     if (matches && matches.length > 0) {
       const ops = [];
       let str = node.data;
