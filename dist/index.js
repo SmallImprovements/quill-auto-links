@@ -13,37 +13,20 @@ var DEFAULT_OPTIONS = {
   type: true
 };
 
-var REGEXP = /https?:\/\/[^\s]+/;
+var REGEXP_GLOBAL = /https?:\/\/[^\s]+/g;
+var REGEXP_WITH_PRECEDING_WS = /(?:\s|^)(https?:\/\/[^\s]+)/;
 
 function registerTypeListener(quill) {
   quill.keyboard.addBinding({
     collapsed: true,
     key: ' ',
-    prefix: REGEXP,
-    handler: function () {
-      var prevOffset = 0;
-      return function (range) {
-        var url = void 0;
-        var text = quill.getText(prevOffset, range.index);
-        var match = text.match(REGEXP);
-        if (match === null) {
-          prevOffset = range.index;
-          return true;
-        }
-        if (match.length > 1) {
-          url = match[match.length - 1];
-        } else {
-          url = match[0];
-        }
-        var ops = [];
-        ops.push({ retain: range.index - url.length });
-        ops.push({ 'delete': url.length });
-        ops.push({ insert: url, attributes: { link: url } });
-        quill.updateContents({ ops: ops });
-        prevOffset = range.index;
-        return true;
-      };
-    }()
+    prefix: REGEXP_WITH_PRECEDING_WS,
+    handler: function handler(range, context) {
+      var url = context.prefix;
+      var ops = [{ retain: range.index - url.length }, { 'delete': url.length }, { insert: url, attributes: { link: url } }];
+      quill.updateContents({ ops: ops });
+      return true;
+    }
   });
 }
 
@@ -52,7 +35,7 @@ function registerPasteListener(quill) {
     if (typeof node.data !== 'string') {
       return;
     }
-    var matches = node.data.match(REGEXP);
+    var matches = node.data.match(REGEXP_GLOBAL);
     if (matches && matches.length > 0) {
       var ops = [];
       var str = node.data;
