@@ -16,13 +16,19 @@ var DEFAULT_OPTIONS = {
 var REGEXP_GLOBAL = /https?:\/\/[^\s]+/g;
 var REGEXP_WITH_PRECEDING_WS = /(?:\s|^)(https?:\/\/[^\s]+)/;
 
+var sliceFromLastWhitespace = function sliceFromLastWhitespace(str) {
+  var whitespaceI = str.lastIndexOf(' ');
+  var sliceI = whitespaceI === -1 ? 0 : whitespaceI + 1;
+  return str.slice(sliceI);
+};
+
 function registerTypeListener(quill) {
   quill.keyboard.addBinding({
     collapsed: true,
     key: ' ',
     prefix: REGEXP_WITH_PRECEDING_WS,
     handler: function handler(range, context) {
-      var url = context.prefix;
+      var url = sliceFromLastWhitespace(context.prefix);
       var ops = [{ retain: range.index - url.length }, { 'delete': url.length }, { insert: url, attributes: { link: url } }];
       quill.updateContents({ ops: ops });
       return true;

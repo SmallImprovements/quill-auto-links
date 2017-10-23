@@ -6,13 +6,19 @@ const DEFAULT_OPTIONS = {
 const REGEXP_GLOBAL = /https?:\/\/[^\s]+/g;
 const REGEXP_WITH_PRECEDING_WS = /(?:\s|^)(https?:\/\/[^\s]+)/;
 
+const sliceFromLastWhitespace = (str) => {
+  const whitespaceI = str.lastIndexOf(' ');
+  const sliceI = whitespaceI === -1 ? 0 : whitespaceI + 1;
+  return str.slice(sliceI);
+};
+
 function registerTypeListener(quill) {
   quill.keyboard.addBinding({
     collapsed: true,
     key: ' ',
     prefix: REGEXP_WITH_PRECEDING_WS,
     handler: (range, context) => {
-      const url = context.prefix;
+      const url = sliceFromLastWhitespace(context.prefix);
       const ops = [
           { retain: range.index - url.length },
           { 'delete': url.length },
