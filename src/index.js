@@ -16,81 +16,69 @@ const sliceFromLastWhitespace = (str) => {
 };
 
 function registerTypeListener(quill) {
-  quill.keyboard.addBinding({
-    collapsed: true,
-    key: ' ',
-    prefix: REGEXP_HTTP_WITH_PRECEDING_WS,
-    handler: (range, context) => {
-      const url = sliceFromLastWhitespace(context.prefix);
-      const ops = [
-          { retain: range.index - url.length },
-          { 'delete': url.length },
-          { insert: url, attributes: { link: url } }
-      ];
-      quill.updateContents({ ops });
-      return true;
+  Object.entries({
+    http: {
+      regexp: REGEXP_HTTP_WITH_PRECEDING_WS,
+      prefix: ''
+    },
+    email: {
+      regexp: REGEXP_EMAIL_WITH_PRECEDING_WS,
+      prefix: 'mailto:'
     }
-  });
-  quill.keyboard.addBinding({
-    collapsed: true,
-    key: ' ',
-    prefix: REGEXP_EMAIL_WITH_PRECEDING_WS,
-    handler: (range, context) => {
-      const url = sliceFromLastWhitespace(context.prefix);
-      const ops = [
-          { retain: range.index - url.length },
-          { 'delete': url.length },
-          { insert: url, attributes: { link: 'mailto:' + url } }
-      ];
-      quill.updateContents({ ops });
-      return true;
-    }
-  });
+  })
+    .forEach(([ format, { regexp, prefix } ]) => {
+      quill.keyboard.addBinding({
+        collapsed: true,
+        key: ' ',
+        prefix: regexp,
+        handler: (range, context) => {
+          const url = sliceFromLastWhitespace(context.prefix);
+          const ops = [
+              { retain: range.index - url.length },
+              { 'delete': url.length },
+              { insert: url, attributes: { link: prefix + url } }
+          ];
+          quill.updateContents({ ops });
+          return true;
+        }
+      });
+    });
 }
 
 function registerPasteListener(quill) {
-  quill.clipboard.addMatcher(Node.TEXT_NODE, (node, delta) => {
-    if (typeof node.data !== 'string') {
-      return;
+  Object.entries({
+    http: {
+      regexp: REGEXP_HTTP_GLOBAL,
+      prefix: ''
+    },
+    email: {
+      regexp: REGEXP_EMAIL_GLOBAL,
+      prefix: 'mailto:'
     }
-    const matches = node.data.match(REGEXP_HTTP_GLOBAL);
-    if (matches && matches.length > 0) {
-      const ops = [];
-      let str = node.data;
-      matches.forEach(match => {
-        const split = str.split(match);
-        const beforeLink = split.shift();
-        ops.push({ insert: beforeLink });
-        ops.push({ insert: match, attributes: { link: match } });
-        str = split.join(match);
-      });
-      ops.push({ insert: str });
-      delta.ops = ops;
-    }
+  })
+    .forEach(([ format, { regexp, prefix } ]) => {
+      quill.clipboard.addMatcher(Node.TEXT_NODE, (node, delta) => {
+        if (typeof node.data !== 'string') {
+          return;
+        }
+        const matches = node.data.match(regexp);
+        if (matches && matches.length > 0) {
+          const ops = [];
+          let str = node.data;
+          matches.forEach(match => {
+            const split = str.split(match);
+            const beforeLink = split.shift();
+            ops.push({ insert: beforeLink });
+            ops.push({ insert: match, attributes: { link: prefix + match } });
+            str = split.join(match);
+          });
+          ops.push({ insert: str });
+          delta.ops = ops;
+        }
 
-    return delta;
-  });
-  quill.clipboard.addMatcher(Node.TEXT_NODE, (node, delta) => {
-    if (typeof node.data !== 'string') {
-      return;
-    }
-    const matches = node.data.match(REGEXP_EMAIL_GLOBAL);
-    if (matches && matches.length > 0) {
-      const ops = [];
-      let str = node.data;
-      matches.forEach(match => {
-        const split = str.split(match);
-        const beforeLink = split.shift();
-        ops.push({ insert: beforeLink });
-        ops.push({ insert: match, attributes: { link: 'mailto:' + match } });
-        str = split.join(match);
+        return delta;
       });
-      ops.push({ insert: str });
-      delta.ops = ops;
-    }
-
-    return delta;
-  });
+    })
 }
 
 export default class AutoLinks {
