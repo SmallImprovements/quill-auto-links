@@ -1,6 +1,8 @@
 const DEFAULT_OPTIONS = {
   paste: true,
   type: true,
+  http: false,
+  email: true,
 };
 
 const REGEXP_HTTP_GLOBAL = /https?:\/\/[^\s]+/g;
@@ -15,7 +17,7 @@ const sliceFromLastWhitespace = (str) => {
   return str.slice(sliceI);
 };
 
-function registerTypeListener(quill) {
+function registerTypeListener(quill, options) {
   Object.entries({
     http: {
       regexp: REGEXP_HTTP_WITH_PRECEDING_WS,
@@ -26,6 +28,7 @@ function registerTypeListener(quill) {
       prefix: 'mailto:'
     }
   })
+    .filter(([ format ]) => options[format])
     .forEach(([ format, { regexp, prefix } ]) => {
       quill.keyboard.addBinding({
         collapsed: true,
@@ -45,7 +48,7 @@ function registerTypeListener(quill) {
     });
 }
 
-function registerPasteListener(quill) {
+function registerPasteListener(quill, options) {
   Object.entries({
     http: {
       regexp: REGEXP_HTTP_GLOBAL,
@@ -56,6 +59,7 @@ function registerPasteListener(quill) {
       prefix: 'mailto:'
     }
   })
+    .filter(([ format ]) => options[format])
     .forEach(([ format, { regexp, prefix } ]) => {
       quill.clipboard.addMatcher(Node.TEXT_NODE, (node, delta) => {
         if (typeof node.data !== 'string') {
@@ -86,10 +90,10 @@ export default class AutoLinks {
     const opts = { ...DEFAULT_OPTIONS, ...options };
 
     if (opts.type) {
-      registerTypeListener(quill);
+      registerTypeListener(quill, opts);
     }
     if (opts.paste) {
-      registerPasteListener(quill);
+      registerPasteListener(quill, opts);
     }
   }
 }
