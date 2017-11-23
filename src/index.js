@@ -3,8 +3,8 @@ const DEFAULT_OPTIONS = {
   type: true,
 };
 
-const REGEXP_GLOBAL = /https?:\/\/[^\s]+/g;
-const REGEXP_WITH_PRECEDING_WS = /(?:\s|^)(https?:\/\/[^\s]+)/;
+const REGEXP_HTTP_GLOBAL = /https?:\/\/[^\s]+/g;
+const REGEXP_HTTP_WITH_PRECEDING_WS = /(?:\s|^)(https?:\/\/[^\s]+)/;
 
 const sliceFromLastWhitespace = (str) => {
   const whitespaceI = str.lastIndexOf(' ');
@@ -16,7 +16,7 @@ function registerTypeListener(quill) {
   quill.keyboard.addBinding({
     collapsed: true,
     key: ' ',
-    prefix: REGEXP_WITH_PRECEDING_WS,
+    prefix: REGEXP_HTTP_WITH_PRECEDING_WS,
     handler: (range, context) => {
       const url = sliceFromLastWhitespace(context.prefix);
       const ops = [
@@ -35,7 +35,7 @@ function registerPasteListener(quill) {
     if (typeof node.data !== 'string') {
       return;
     }
-    const matches = node.data.match(REGEXP_GLOBAL);
+    const matches = node.data.match(REGEXP_HTTP_GLOBAL);
     if (matches && matches.length > 0) {
       const ops = [];
       let str = node.data;
