@@ -1,7 +1,7 @@
 const DEFAULT_OPTIONS = {
   paste: true,
   type: true,
-  http: false,
+  http: true,
   email: true,
 };
 
