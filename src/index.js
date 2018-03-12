@@ -38,8 +38,7 @@ function registerTypeListener(quill, options) {
           const url = sliceFromLastWhitespace(context.prefix);
           const ops = [
               { retain: range.index - url.length },
-              { 'delete': url.length },
-              { insert: url, attributes: { link: prefix + url } }
+              { retain: url.length, attributes: { link: prefix + url } }
           ];
           quill.updateContents({ ops });
           return true;
