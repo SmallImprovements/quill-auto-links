@@ -27,6 +27,8 @@ const quill = new Quill(editor, {
 
 - `paste` Enable link formatting when pasting text - defaults to `true`
 - `type ` Enable link formatting when typing text - defaults to `true`
+- `http` Enable link formatting for web links - defaults to `true`
+- `email` Enable link formatting for email addresses - defaults to `true`
 
 Examples:
 ```javascript
@@ -56,6 +58,28 @@ const quill3 = new Quill(editor, {
     autoLinks: {
       paste: false,
       type: true
+    }
+  }
+});
+
+
+// Disable for email addresses, but enable for web links
+
+const quill4 = new Quill(editor, {
+  modules: {
+    autoLinks: {
+      email: false
+    }
+  }
+});
+
+
+// Disable for web links, but enable for email addresses
+
+const quill5 = new Quill(editor, {
+  modules: {
+    autoLinks: {
+      http: false
     }
   }
 });
