@@ -1,6 +1,6 @@
 {
   "name": "quill-auto-links",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Automatically convert typed and pasted links to real links in Quill",
   "main": "dist/index.js",
   "babel": {

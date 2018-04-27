@@ -21,7 +21,6 @@ var sliceFromLastWhitespace = function sliceFromLastWhitespace(str) {
   var sliceI = whitespaceI === -1 ? 0 : whitespaceI + 1;
   return str.slice(sliceI);
 };
-
 function registerTypeListener(quill) {
   quill.keyboard.addBinding({
     collapsed: true,
@@ -29,7 +28,9 @@ function registerTypeListener(quill) {
     prefix: REGEXP_WITH_PRECEDING_WS,
     handler: function handler(range, context) {
       var url = sliceFromLastWhitespace(context.prefix);
-      var ops = [{ retain: range.index - url.length }, { 'delete': url.length }, { insert: url, attributes: { link: url } }];
+      var retain = range.index - url.length;
+      var ops = retain ? [{ retain: retain }] : [];
+      ops.push({ 'delete': url.length }, { insert: url, attributes: { link: url } });
       quill.updateContents({ ops: ops });
       return true;
     }
